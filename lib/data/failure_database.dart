@@ -7,7 +7,7 @@ class FailureDatabase {
 
   //**
   // Records a failure for the given DrillSpot
-  // Builds a uniqe key from the spot details then increments failure weight
+  // Builds a unique key from the spot details then increments failure weight
   //*/
   void recordFailure(DrillSpot spot) {
     final storageString = spot.toStorageKey();
