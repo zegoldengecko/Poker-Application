@@ -407,7 +407,7 @@ class _PokerTable extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          pos,
+                          displayPos,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 7,
