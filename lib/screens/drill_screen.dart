@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:push_fold_main/services/drill_generator.dart';
+import 'package:push_fold_main/services/hand_parser.dart';
 import 'package:push_fold_main/models/drill_spot.dart';
 import 'package:push_fold_main/data/gto_charts.dart';
-import 'package:push_fold_main/data/common_failures.dart';
+import 'package:push_fold_main/data/failure_database.dart';
 import 'dart:math';
 
 class DrillScreen extends StatefulWidget {
@@ -21,45 +22,26 @@ class _DrillScreenState extends State<DrillScreen> {
     spot = generateRandomSpot();
   }
 
+  //**
+  // Advances to the next drill spot
+  //*/
   void nextSpot() {
     setState(() {
       spot = generateRandomSpot();
     });
   }
 
+  //**
+  // Checks if the answer was correct, records or removes the failure,
+  // then moves to the next spot
+  //*/
   void submitAnswer(bool pushed, DrillSpot spot) {
     if (pushed && shouldShove(spot) || !pushed && !shouldShove(spot)) {
-      removeFailure(spot);
+      failureDatabase.removeFailure(spot);
     } else {
-      recordFailure(spot);
+      failureDatabase.recordFailure(spot);
     }
     nextSpot();
-  }
-
-  // Parse hand string like "Ad4d" or "AKo" into two cards
-  List<Map<String, dynamic>> parseHand(String hand) {
-    const suitSymbols = {'h': '♥', 'd': '♦', 'c': '♣', 's': '♠'};
-    const redSuits = {'h', 'd'};
-
-    // Suited hand e.g. "Ad4d"
-    if (hand.length == 4) {
-      final r1 = hand[0];
-      final s1 = hand[1];
-      final r2 = hand[2];
-      final s2 = hand[3];
-      return [
-        {'rank': r1, 'suit': suitSymbols[s1] ?? s1, 'red': redSuits.contains(s1)},
-        {'rank': r2, 'suit': suitSymbols[s2] ?? s2, 'red': redSuits.contains(s2)},
-      ];
-    }
-
-    // Offsuit/pair e.g. "AKo" or "AA"
-    final r1 = hand[0];
-    final r2 = hand[1];
-    return [
-      {'rank': r1, 'suit': '♠', 'red': false},
-      {'rank': r2, 'suit': (hand.endsWith('o') ? '♥' : '♣'), 'red': hand.endsWith('o')},
-    ];
   }
 
   @override
@@ -84,12 +66,11 @@ class _DrillScreenState extends State<DrillScreen> {
 
               const Spacer(),
 
-              // Poker table
+              // Poker table diagram
               _PokerTable(activePosition: spot.position),
 
               const Spacer(),
 
-              // Cards label
               const Text(
                 'Your hole cards',
                 style: TextStyle(fontSize: 12, color: Color(0xFF506070)),
@@ -150,8 +131,9 @@ class _DrillScreenState extends State<DrillScreen> {
   }
 }
 
-// ── Widgets ──────────────────────────────────────────────────────────────────
+// --------------------------- Widgets --------------------------
 
+// Displays a labelled value badge e.g. "Position: BTN"
 class _InfoBadge extends StatelessWidget {
   final String label;
   final String value;
@@ -183,6 +165,7 @@ class _InfoBadge extends StatelessWidget {
   }
 }
 
+// Renders a single playing card with rank and suit
 class _PlayingCard extends StatelessWidget {
   final String rank;
   final String suit;
@@ -204,7 +187,6 @@ class _PlayingCard extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Top-left corner pip
           Positioned(
             top: 5,
             left: 6,
@@ -215,7 +197,6 @@ class _PlayingCard extends StatelessWidget {
               ],
             ),
           ),
-          // Centre
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -231,6 +212,7 @@ class _PlayingCard extends StatelessWidget {
   }
 }
 
+// Push/Fold action button with a label and sublabel
 class _ActionButton extends StatelessWidget {
   final String label;
   final String sublabel;
@@ -272,12 +254,12 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
+// Renders an oval poker table with seat positions, highlighting the active one
 class _PokerTable extends StatelessWidget {
   final String activePosition;
 
   const _PokerTable({required this.activePosition});
 
-  // 8-handed positions in clockwise order starting from BTN at top-right
   static const _positions = ['BTN', 'CO', 'HJ', 'LJ', 'UTG+1', 'UTG', 'BB', 'SB'];
 
   @override
@@ -285,11 +267,12 @@ class _PokerTable extends StatelessWidget {
     const tableW = 260.0;
     const tableH = 150.0;
     const seatR = 11.0;
-    // Ellipse radii for seat placement (seat centre on the ellipse)
+
     const rx = tableW / 2 + seatR + 2;
     const ry = tableH / 2 + seatR + 2;
     const cx = rx;
     const cy = ry;
+
     final totalW = cx * 2;
     final totalH = cy * 2;
 
@@ -322,7 +305,7 @@ class _PokerTable extends StatelessWidget {
             ),
           ),
 
-          // Seats
+          // Seats, placed around the ellipse
           ..._positions.asMap().entries.map((entry) {
             final i = entry.key;
             final pos = entry.value;

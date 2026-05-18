@@ -1,29 +1,34 @@
 import 'dart:math';
 import 'package:push_fold_main/models/drill_spot.dart';
-import '../data/common_failures.dart';
+import 'package:push_fold_main/data/failure_database.dart';
 
 final _positions = ['SB', 'UTG', 'UTG+1', 'UTG+2', 'UTG+3', 'LJ', 'HJ', 'CO', 'BTN'];
 final _stacks = List.generate(15, (i) => i + 1);
 
+
+//** 
+// Generates a random Drillspot, with a 1 in 3 chance of pulling from previously failed hands
+//*/ 
 DrillSpot generateRandomSpot() {
   final rand = Random();
 
-  // 2 in 3 chance of pulling from list of commonly failing hands
+  // 1 in 3 chance of pulling from list of commonly failing hands
   if ((rand.nextInt(3) + 1) > 2) {
-    final result = useChallengingHand(rand);
-    return result;
+    return useChallengingHand(rand);
   }
 
-  // otherwise generate new hand
+  // Otherwise generate new hand
   final position = _positions[rand.nextInt(_positions.length)];
   final stack = _stacks[rand.nextInt(_stacks.length)];
-
-  final hand = _randomhand(rand);
+  final hand = _randomHand(rand);
 
   return DrillSpot(position: position, stack: stack, hand: hand);
 }
 
-String _randomhand(Random rand) {
+//**
+// Generates a random poker hand string (e.g. AKs, 72o, TT)
+// */
+String _randomHand(Random rand) {
   const ranks = '23456789TJQKA';
 
   final r1 = ranks[rand.nextInt(ranks.length)];
@@ -44,20 +49,22 @@ String _randomhand(Random rand) {
   return '$hi$lo$suited';
 }
 
-// Checks the value of a rank (high or low)
+// Returns the rank index of a card
 int _rankValue(String r) => '23456789TJQKA'.indexOf(r);
 
-// Function to use an existing hand that the user has had trouble with
+//**
+// Picks a DrillSpot from the FailureDatabase, weighted by failures
+// */
 DrillSpot useChallengingHand(Random rand) {
-  if (failureDB.isEmpty) {
+  if (failureDatabase.db.isEmpty) {
     return generateRandomSpot();
   }
 
   final List<String> weightedKeys = [];
 
   // Adding to weighted keys depending on weight
-  for (final entry in failureDB.values) {
-    for (int i = 0; i < entry.weight; i++) {
+  for (final entry in failureDatabase.db.entries) {
+    for (int i = 0; i < entry.value.weight; i++) {
       weightedKeys.add(entry.key);
     }
   }
@@ -68,17 +75,5 @@ DrillSpot useChallengingHand(Random rand) {
 
   // Picking a random key
   final selectedKey = weightedKeys[rand.nextInt(weightedKeys.length)];
-
-  return convertToSpot(selectedKey);
-}
-
-DrillSpot convertToSpot(String key) {
-  // split the key
-  final parts = key.split('_');
-
-  final position = parts[0];
-  final stack = int.parse(parts[1]);
-  final hand = parts[2];
-
-  return DrillSpot(position: position, stack: stack, hand: hand);
+  return DrillSpot.fromStorageKey(selectedKey);
 }

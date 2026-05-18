@@ -1,18 +1,15 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// GTO Push/Fold Charts — Compact Format with Range Parser
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// GTO Push/Fold Charts
+// -----------------------------------------------------------------------------
 //
 // Range string notation:
 //   22+      all pairs from 22 up to AA
 //   AKs      exact suited hand
 //   AKo      exact offsuit hand
-//   AK       both suited and offsuit (AKs + AKo)
-//   A2s+     A2s up to AKs (all suited aces from A2s)
-//   K5o+     K5o up to KQo
-//   87s      exact hand only (no +)
+//   A2s+     A2s up to AKs
+//   A2o+     A2o up to AKo
 
 import 'package:push_fold_main/models/drill_spot.dart';
-
 
 // ranking cards from lowest to highest and converting to a number
 const String _ranks = '23456789TJQKA';
@@ -87,7 +84,7 @@ List<String> parseRange(String range) {
   return hands.toList();
 }
 
-/// Returns true if [hand] is a shove from [position] at [stackDepth] BB.
+/// Returns true if the given spot is a shove according to GTO charts
 bool shouldShove(DrillSpot spot) {
   final posMap = gtoCharts[spot.position];
   if (posMap == null) return false;
@@ -96,10 +93,10 @@ bool shouldShove(DrillSpot spot) {
   return parseRange(range).contains(spot.hand);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Chart Data
 // position -> stack depth (BB) -> range string (shove = listed, else fold)
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 const Map<String, Map<int, String>> gtoCharts = {
 
@@ -186,7 +183,7 @@ const Map<String, Map<int, String>> gtoCharts = {
     3:  '33+ A2s+ A4o+ K5s+ K9o+ Q8s+ QTo+ J9s+ JTo+ T9s',
     4:  '22+ A2s+ A4o+ K6s+ KTo+ Q9s+ QTo+ J9s+ T9s',
     5:  '22+ A2s+ A7o+ A5o K8s+ KTo+ Q9s+ QJo J9s+ T8s+ 98s',
-    6:  '22+ A2s+ A7o+ K9s+ KJo+ Q9s+ QJo J89+ T8s+ 98s',
+    6:  '22+ A2s+ A7o+ K9s+ KJo+ Q9s+ QJo J9s+ T8s+ 98s',
     7:  '22+ A3s+ A9o+ K9s+ KJo+ Q9s+ QJo J9s+ T8s+ 98s',
     8:  '22+ A3s+ A8o+ K9s+ KJo+ Q9s+ J9s+ T8s+ 98s',
     9:  '33+ A7s+ A5s A4s ATo+ K9s+ KJo+ Q9s+ J9s+ T9s',
