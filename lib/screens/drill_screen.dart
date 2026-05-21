@@ -25,9 +25,7 @@ class _DrillScreenState extends State<DrillScreen> {
     cards = parseHand(spot.hand);
   }
 
-  //**
-  // Advances to the next drill spot
-  //*/
+  // Advancing to next drill spot
   void nextSpot() {
     setState(() {
       spot = generateRandomSpot();
@@ -35,21 +33,19 @@ class _DrillScreenState extends State<DrillScreen> {
     });
   }
 
-  //**
-  // Checks if the answer was correct, flashes the background,
-  // records or removes the failure, then moves to the next spot
-  //*/
+  // Checking if answer was correct and acts accordingly
   void submitAnswer(bool pushed, DrillSpot spot) {
     final correct = (pushed && shouldShove(spot)) || (!pushed && !shouldShove(spot));
 
+    // Updating failure database
     if (correct) {
       failureDatabase.removeFailure(spot);
     } else {
       failureDatabase.recordFailure(spot);
     }
 
+    // Flashing green for correct and red for incorrect
     setState(() => _flashCorrect = correct);
-
     Future.delayed(const Duration(milliseconds: 400), () {
       if (mounted) {
         setState(() => _flashCorrect = null);
@@ -185,7 +181,7 @@ class _InfoBadge extends StatelessWidget {
   }
 }
 
-// Renders a single playing card with rank and suit
+// Displays a single playing card with rank and suit
 class _PlayingCard extends StatelessWidget {
   final String rank;
   final String suit;
@@ -290,8 +286,7 @@ class _ActionButtonState extends State<_ActionButton> {
   }
 }
 
-// Renders an oval poker table with seat positions, highlighting the active one
-// BTN marker, SB and BB chips are shown at their respective seats
+// Renders an oval poker table with seat positions, highlighting the active seat
 class _PokerTable extends StatelessWidget {
   final String activePosition;
 
@@ -299,11 +294,13 @@ class _PokerTable extends StatelessWidget {
 
   static const _positions = ['BTN', 'CO', 'HJ', 'LJ', '+3', '+2', '+1', 'UTG', 'BB', 'SB'];
 
+  static const double tableW = 460;
+  static const double tableH = 270;
+  static const double seatR = 14;
+  static const double chipOffsetScale = 0.62;
+
   @override
   Widget build(BuildContext context) {
-    const tableW = 460.0;
-    const tableH = 270.0;
-    const seatR = 14.0;
 
     const rx = tableW / 2 + seatR + 2;
     const ry = tableH / 2 + seatR + 2;
@@ -354,7 +351,7 @@ class _PokerTable extends StatelessWidget {
               ),
             ),
 
-            // Community card placeholders
+            // Community card spots
             Positioned(
               left: seatR + 2 + tableW / 2 - 5 * 22 / 2 + offsetX,
               top: seatR + 2 + tableH / 2 - 18 + offsetY,
@@ -372,7 +369,7 @@ class _PokerTable extends StatelessWidget {
               ),
             ),
 
-            // Seats placed around the ellipse
+            // Seats placed around the table
             ..._positions.asMap().entries.map((entry) {
               final i = entry.key;
               final pos = entry.value;
@@ -384,7 +381,6 @@ class _PokerTable extends StatelessWidget {
               final checkPos = pos == '+1' ? 'UTG+1' : pos == '+2' ? 'UTG+2' : pos == '+3' ? 'UTG+3' : pos;
               final isActive = checkPos == activePosition;
 
-              final chipOffsetScale = 0.62;
               final chipX = cx + rx * chipOffsetScale * cos(angle) - 7;
               final chipY = cy + ry * chipOffsetScale * sin(angle) - 7;
 
