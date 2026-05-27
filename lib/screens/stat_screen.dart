@@ -12,7 +12,7 @@ class StatScreen extends StatefulWidget {
 class _StatScreenState extends State<StatScreen> {
   late StatsCalculator calculator;
 
-  final List<String> positions = ['BTN', 'SB', 'BB', 'CO', 'HJ', 'UTG'];
+  final List<String> positions = ['BTN', 'SB', 'BB', 'CO', 'HJ', 'UTG', 'UTG+1', 'UTG+2', 'UTG+3'];
 
   @override
   void initState() {
