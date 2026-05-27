@@ -68,6 +68,15 @@ class _DrillScreenState extends State<DrillScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             children: [
+              // Back button
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white54),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+              
               const Spacer(),
 
               // Poker table diagram

@@ -3,7 +3,7 @@ List<Map<String, dynamic>> parseHand(String hand) {
   const suitSymbols = {'h': '♥', 'd': '♦', 'c': '♣', 's': '♠'};
   const redSuits = {'h', 'd'};
 
-  // Suited hand e.g. "Ad4d"
+  // Suited hand e.g. "A4s"
   if (hand.length == 4) {
     final r1 = hand[0];
     final s1 = hand[1];

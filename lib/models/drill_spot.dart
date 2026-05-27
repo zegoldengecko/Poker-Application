@@ -10,8 +10,8 @@ class DrillSpot {
     required this.hand
   });
 
-  // Returns a unique string key combining psoition, stack, and hand
-  String toStorageKey() => '${position}_${stack}_${hand}';
+  // Returns a unique string key combining position, stack, and hand (e.g. BTN_5_AKo)
+  String toStorageKey() => '${position}_${stack}_$hand';
 
   // Parsing a key back into a drill spot
   factory DrillSpot.fromStorageKey(String key) {

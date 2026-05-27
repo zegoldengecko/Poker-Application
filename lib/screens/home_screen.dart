@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:push_fold_main/screens/drill_screen.dart';
+import 'package:push_fold_main/screens/stat_screen.dart';
 
 // Main title screen for the application
 class HomeScreen extends StatelessWidget {
@@ -60,7 +61,19 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   const _MenuButton(title: "Learn"),
                   const SizedBox(height: 16),
-                  const _MenuButton(title: "Stats"),
+
+                  // Navigating to the Stats Screen
+                  _MenuButton(
+                    title: "Stats",
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const StatScreen(),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
