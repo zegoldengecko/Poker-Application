@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:push_fold_main/data/stats_database.dart';
 import 'package:push_fold_main/services/drill_generator.dart';
 import 'package:push_fold_main/services/hand_parser.dart';
 import 'package:push_fold_main/models/drill_spot.dart';
 import 'package:push_fold_main/data/gto_charts.dart';
 import 'package:push_fold_main/data/failure_database.dart';
+import 'package:push_fold_main/data/stats_record.dart';
 import 'dart:math';
 
 class DrillScreen extends StatefulWidget {
@@ -44,6 +46,14 @@ class _DrillScreenState extends State<DrillScreen> {
       failureDatabase.recordFailure(spot);
     }
 
+    // Updating stats database
+    final record = StatsRecord(
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+      drillspot: spot,
+      result: correct ? 1 : 0,
+    );
+    statsDatabase.recordResult(record);
+
     // Flashing green for correct and red for incorrect
     setState(() => _flashCorrect = correct);
     Future.delayed(const Duration(milliseconds: 400), () {
@@ -76,7 +86,7 @@ class _DrillScreenState extends State<DrillScreen> {
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
-              
+
               const Spacer(),
 
               // Poker table diagram
