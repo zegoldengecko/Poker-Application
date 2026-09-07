@@ -5,24 +5,36 @@ import 'package:push_fold_main/data/failure_database.dart';
 final _positions = ['SB', 'UTG', 'UTG+1', 'UTG+2', 'UTG+3', 'LJ', 'HJ', 'CO', 'BTN'];
 final _stacks = List.generate(15, (i) => i + 1);
 
+// Tracks the last spot shown so we never repeat it back-to-back
+String? _lastSpotKey;
 
 //** 
-// Generates a random Drillspot, with a 1 in 3 chance of pulling from previously failed hands
+// Generates a random Drillspot, with a 1 in 3 chance of pulling from previously failed hands.
+// Guaranteed not to return the same spot as the previous call.
 //*/ 
 DrillSpot generateRandomSpot() {
   final rand = Random();
 
-  // 1 in 3 chance of pulling from list of commonly failing hands
-  if ((rand.nextInt(3) + 1) > 2) {
-    return useChallengingHand(rand);
-  }
+  DrillSpot spot;
+  int attempts = 0;
 
-  // Otherwise generate new hand
-  final position = _positions[rand.nextInt(_positions.length)];
-  final stack = _stacks[rand.nextInt(_stacks.length)];
-  final hand = _randomHand(rand);
+  // Keep generating until we get something different from last time,
+  // or give up after a reasonable number of tries (safety net against infinite loop)
+  do {
+    // 1 in 3 chance of pulling from list of commonly failing hands
+    if ((rand.nextInt(3) + 1) > 2) {
+      spot = useChallengingHand(rand);
+    } else {
+      final position = _positions[rand.nextInt(_positions.length)];
+      final stack = _stacks[rand.nextInt(_stacks.length)];
+      final hand = _randomHand(rand);
+      spot = DrillSpot(position: position, stack: stack, hand: hand);
+    }
+    attempts++;
+  } while (spot.toStorageKey() == _lastSpotKey && attempts < 20);
 
-  return DrillSpot(position: position, stack: stack, hand: hand);
+  _lastSpotKey = spot.toStorageKey();
+  return spot;
 }
 
 //**
@@ -57,7 +69,10 @@ int _rankValue(String r) => '23456789TJQKA'.indexOf(r);
 // */
 DrillSpot useChallengingHand(Random rand) {
   if (failureDatabase.db.isEmpty) {
-    return generateRandomSpot();
+    final position = _positions[rand.nextInt(_positions.length)];
+    final stack = _stacks[rand.nextInt(_stacks.length)];
+    final hand = _randomHand(rand);
+    return DrillSpot(position: position, stack: stack, hand: hand);
   }
 
   final List<String> weightedKeys = [];
@@ -70,7 +85,10 @@ DrillSpot useChallengingHand(Random rand) {
   }
 
   if (weightedKeys.isEmpty) {
-    return generateRandomSpot();
+    final position = _positions[rand.nextInt(_positions.length)];
+    final stack = _stacks[rand.nextInt(_stacks.length)];
+    final hand = _randomHand(rand);
+    return DrillSpot(position: position, stack: stack, hand: hand);
   }
 
   // Picking a random key
