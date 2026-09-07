@@ -8,6 +8,21 @@ import 'package:push_fold_main/data/failure_database.dart';
 import 'package:push_fold_main/data/stats_record.dart';
 import 'dart:math';
 
+// Formats the ante value for display (e.g. '10' -> '10%', 'bb' -> 'BB')
+String _formatAnte(String ante) {
+  switch (ante) {
+    case '0':
+      return '0%';
+    case '10':
+      return '10%';
+    case '12.5':
+      return '12.5%';
+    case 'bb':
+      return 'BB';
+    default:
+      return ante;
+  }
+}
 class DrillScreen extends StatefulWidget {
   const DrillScreen({super.key});
 
@@ -127,6 +142,8 @@ class _DrillScreenState extends State<DrillScreen> {
                   _InfoBadge(label: 'Position', value: spot.position),
                   const SizedBox(width: 12),
                   _InfoBadge(label: 'Stack', value: '${spot.stack}bb'),
+                  const SizedBox(width: 12),
+                  _InfoBadge(label: 'Ante', value: _formatAnte(spot.ante)),
                 ],
               ),
 

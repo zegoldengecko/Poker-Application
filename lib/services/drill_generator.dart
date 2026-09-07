@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:push_fold_main/models/drill_spot.dart';
 import 'package:push_fold_main/data/failure_database.dart';
+import 'package:push_fold_main/services/drill_settings.dart';
 
 final _positions = ['SB', 'UTG', 'UTG+1', 'UTG+2', 'UTG+3', 'LJ', 'HJ', 'CO', 'BTN'];
 final _stacks = List.generate(15, (i) => i + 1);
@@ -28,7 +29,7 @@ DrillSpot generateRandomSpot() {
       final position = _positions[rand.nextInt(_positions.length)];
       final stack = _stacks[rand.nextInt(_stacks.length)];
       final hand = _randomHand(rand);
-      spot = DrillSpot(position: position, stack: stack, hand: hand);
+      spot = DrillSpot(position: position, stack: stack, ante: DrillSettings.anteLevel.value, hand: hand);
     }
     attempts++;
   } while (spot.toStorageKey() == _lastSpotKey && attempts < 20);
@@ -72,7 +73,7 @@ DrillSpot useChallengingHand(Random rand) {
     final position = _positions[rand.nextInt(_positions.length)];
     final stack = _stacks[rand.nextInt(_stacks.length)];
     final hand = _randomHand(rand);
-    return DrillSpot(position: position, stack: stack, hand: hand);
+    return DrillSpot(position: position, stack: stack, ante: DrillSettings.anteLevel.value, hand: hand);
   }
 
   final List<String> weightedKeys = [];
@@ -88,7 +89,7 @@ DrillSpot useChallengingHand(Random rand) {
     final position = _positions[rand.nextInt(_positions.length)];
     final stack = _stacks[rand.nextInt(_stacks.length)];
     final hand = _randomHand(rand);
-    return DrillSpot(position: position, stack: stack, hand: hand);
+    return DrillSpot(position: position, stack: stack, ante: DrillSettings.anteLevel.value, hand: hand);
   }
 
   // Picking a random key

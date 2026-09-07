@@ -2,11 +2,13 @@
 class DrillSpot {
   final String position;
   final int stack;
+  final String ante; 
   final String hand;
 
   DrillSpot({
     required this.position,
     required this.stack,
+    required this.ante,
     required this.hand
   });
 
@@ -20,6 +22,7 @@ class DrillSpot {
     return DrillSpot(
       position: parts[0],
       stack: int.parse(parts[1]),
+      ante: parts[2],
       hand: parts[2]
     );
   }
